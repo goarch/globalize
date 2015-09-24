@@ -16,11 +16,12 @@ module Globalize
     end
 
     def try_interpolation(translation,args)
-      if args
-        I18n.interpolate(translation,args)
-      else
-        translation
-      end
+      #if args
+      #  I18n.interpolate(translation,args)
+      #else
+      #  translation
+      #end
+      translation
     end
 
     extend self

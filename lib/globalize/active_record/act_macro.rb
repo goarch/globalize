@@ -4,7 +4,7 @@ module Globalize
       def translates(*attr_names)
         options = attr_names.extract_options!
         # Bypass setup_translates! if the initial bootstrapping is done already.
-        setup_translates!(options) unless translates?
+        setup_translates!(options)# unless translates?
 
         # Add any extra translatable attributes.
         attr_names = attr_names.map(&:to_sym)
@@ -20,9 +20,9 @@ module Globalize
         end
       end
 
-      def translates?
-        included_modules.include?(InstanceMethods)
-      end
+      #def translates?
+      #  included_modules.include?(InstanceMethods)
+      #end
 
       protected
 
@@ -73,7 +73,7 @@ module Globalize
         has_many :translations, :class_name  => translation_class.name,
                                 :foreign_key => options[:foreign_key],
                                 :dependent   => :destroy,
-                                :extend      => HasManyExtensions,
+                                #:extend      => HasManyExtensions,
                                 :autosave    => true
 
         before_create :save_translations!
@@ -82,9 +82,9 @@ module Globalize
     end
 
     module HasManyExtensions
-      def find_or_initialize_by_locale(locale)
-        with_locale(locale.to_s).first || build(:locale => locale.to_s)
-      end
+      #def find_or_initialize_by_locale(locale)
+      #  with_locale(locale.to_s).first || build(:locale => locale.to_s)
+      #end
     end
   end
 end
