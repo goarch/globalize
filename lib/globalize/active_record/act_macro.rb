@@ -66,7 +66,7 @@ module Globalize
         apply_globalize_options(options)
 
         include InstanceMethods
-        extend  ClassMethods, Migration
+        extend  ClassMethods
 
         translation_class.table_name = options[:table_name]
 
