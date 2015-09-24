@@ -134,9 +134,23 @@ module Globalize
         translations_by_locale(&:"#{name}")
       end
 
-      # Get available locales from translations association, without a separate distinct query
-      def available_locales
-        translations.map(&:locale).uniq
+      def available_languages
+        translations.map(&:language).uniq
+      end
+
+      #TJB TODO: try to find shorthand way to do this
+      def available_language_names
+        translations.map {|t| t.language.name}.uniq
+      end
+
+      #TJB TODO: try to find shorthand way to do this
+      def available_language_codes
+        translations.map {|t| t.language.code}.uniq
+      end
+
+      #TJB TODO: see if something similar exists somewhere in this code already
+      def has_language?(language_code)
+        available_languages.include?(Language.find_by_code(language_code))
       end
 
       def globalize_fallbacks(locale)

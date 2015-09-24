@@ -2,7 +2,11 @@ module Globalize
   module ActiveRecord
     class Translation < ::ActiveRecord::Base
 
-      validates :locale, :presence => true
+      belongs_to :translator
+
+      delegate :language, to: :translator
+      validates_presence_of :translator_id
+
 
       class << self
         # Sometimes ActiveRecord queries .table_exists? before the table name
