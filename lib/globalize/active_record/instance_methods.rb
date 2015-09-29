@@ -1,7 +1,7 @@
 module Globalize
   module ActiveRecord
     module InstanceMethods
-      delegate :translated_locales, :to => :translations
+      delegate :translated_languages, :to => :translations
 
       def globalize
         @globalize ||= Adapter.new(self)
@@ -104,11 +104,10 @@ module Globalize
           globalize.write(locale, name, other.globalize.fetch(locale, name) )
         end
       end
-=begin
+
       def translation
         translation_for(::Globalize.locale)
       end
-=end
 
       def translation_for(language_code, build_if_missing = true)
         unless translation_caches[language_code]
@@ -193,7 +192,7 @@ module Globalize
       def rollback
         translation_caches[::Globalize.locale] = translation.previous_version
       end
-=end
+
       def save(*)
         Globalize.with_locale(translation.locale || I18n.default_locale) do
           without_fallbacks do
@@ -201,7 +200,7 @@ module Globalize
           end
         end
       end
-
+=end
       def column_for_attribute name
         return super if translated_attribute_names.exclude?(name)
 
