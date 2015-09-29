@@ -36,7 +36,9 @@ module Globalize
         end
 
         def translated_languages
-          select('DISTINCT langauge').order(:langauge).map(&:langauge)
+          #select('DISTINCT langauge').order(:langauge).map(&:langauge)
+          #map(&:language).uniq.order(:langauge)
+          map {|t| t.language.code}.uniq
         end
       end
 
