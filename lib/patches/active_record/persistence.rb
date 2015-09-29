@@ -2,6 +2,7 @@ module ActiveRecord
   module Persistence
     # Updates the associated record with values matching those of the instance attributes.
     # Returns the number of affected rows.
+=begin
     def _update_record(attribute_names = self.attribute_names)
       attribute_names_without_translated = attribute_names.select{ |k| not respond_to?('translated?') or not translated?(k) }
       attributes_values = arel_attributes_with_values_for_update(attribute_names_without_translated)
@@ -22,5 +23,6 @@ module ActiveRecord
       @new_record = false
       id
     end
+=end
   end
 end

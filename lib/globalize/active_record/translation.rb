@@ -15,6 +15,14 @@ module Globalize
           table_name.present? && super
         end
 
+        def with_languages(*languages)
+          # Avoid using "IN" with SQL queries when only using one locale.
+          languages = languages.flatten.map(&:to_s)
+          languages = languages.first if languages.one?
+          where :languages => languages
+        end
+        alias with_language with_languages
+
         def with_locales(*locales)
           # Avoid using "IN" with SQL queries when only using one locale.
           locales = locales.flatten.map(&:to_s)
@@ -25,6 +33,10 @@ module Globalize
 
         def translated_locales
           select('DISTINCT locale').order(:locale).map(&:locale)
+        end
+
+        def translated_languages
+          select('DISTINCT langauge').order(:langauge).map(&:langauge)
         end
       end
 

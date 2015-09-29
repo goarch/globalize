@@ -1,22 +1,19 @@
 module Globalize
   module ActiveRecord
     module ClassMethods
-      delegate :translated_locales, :set_translations_table_name, :to => :translation_class
+      delegate :translated_languages, :set_translations_table_name, :to => :translation_class
+
+      def with_languages(*languages)
+        all.merge translation_class.with_languages(*languages)
+      end
 
       def with_locales(*locales)
         all.merge translation_class.with_locales(*locales)
       end
 
-      def with_translations(*locales)
-        locales = translated_locales if locales.empty?
-        preload(:translations).joins(:translations).readonly(false).with_locales(locales)
-      end
-
-      def with_required_attributes
-        warn 'with_required_attributes is deprecated and will be removed in the next release of Globalize.'
-        required_translated_attributes.inject(all) do |scope, name|
-          scope.where("#{translated_column_name(name)} IS NOT NULL")
-        end
+      def with_translations(*languages)
+        languages = translated_languages if languages.empty?
+        preload(:translations).joins(:translations).readonly(false).with_languages(languages)
       end
 
       def with_translated_attribute(name, value, locales = Globalize.fallbacks)
@@ -28,16 +25,6 @@ module Globalize
 
       def translated?(name)
         translated_attribute_names.include?(name.to_sym)
-      end
-
-      def required_attributes
-        warn 'required_attributes is deprecated and will be removed in the next release of Globalize.'
-        validators.map { |v| v.attributes if v.is_a?(ActiveModel::Validations::PresenceValidator) }.flatten
-      end
-
-      def required_translated_attributes
-        warn 'required_translated_attributes is deprecated and will be removed in the next release of Globalize.'
-        translated_attribute_names & required_attributes
       end
 
       def translation_class
@@ -92,17 +79,19 @@ module Globalize
 
       def define_translations_reader(name)
         define_method(:"#{name}_translations") do
-          hash = translated_attribute_by_locale(name)
-          globalize.stash.keys.each_with_object(hash) do |locale, result|
-            result[locale] = globalize.fetch_stash(locale, name) if globalize.stash_contains?(locale, name)
+          #hash = translated_attribute_by_locale(name)
+          hash = translated_attribute_by_langauge(name)
+          globalize.stash.keys.each_with_object(hash) do |language, result|
+            result[language] = globalize.fetch_stash(language, name) if globalize.stash_contains?(language, name)
           end
         end
       end
 
       def define_translations_writer(name)
         define_method(:"#{name}_translations=") do |value|
-          value.each do |(locale, value)|
-            write_attribute name, value, :locale => locale
+          #value.each do |(locale, value)|
+          value.each do |(language, value)|
+            write_attribute name, value, :language => langauge
           end
         end
       end

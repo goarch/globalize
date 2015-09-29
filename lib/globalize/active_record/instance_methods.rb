@@ -104,34 +104,67 @@ module Globalize
           globalize.write(locale, name, other.globalize.fetch(locale, name) )
         end
       end
-
+=begin
       def translation
         translation_for(::Globalize.locale)
       end
+=end
 
-      def translation_for(locale, build_if_missing = true)
-        unless translation_caches[locale]
+      def translation_for(language_code, build_if_missing = true)
+        unless translation_caches[language_code]
           # Fetch translations from database as those in the translation collection may be incomplete
-          _translation = translations.detect{|t| t.locale.to_s == locale.to_s}
-          _translation ||= translations.with_locale(locale).first unless translations.loaded?
-          _translation ||= translations.build(:locale => locale) if build_if_missing
-          translation_caches[locale] = _translation if _translation
+          _translation = translations.detect{|t| t.language.code.to_s == language_code.to_s}
+          #_translation ||= translations.with_language(language_code).first unless translations.loaded?
+          #_translation ||= translations.build(:language_code => language_code) if build_if_missing
+          if build_if_missing
+            @language_id = Language.where(:code => language_code).first.id
+            @translator_id = Translator.where(:language_id => @language_id).first.id
+            _translation ||= translations.build(:translator => @translator_id)
+          end
+          translation_caches[language_code] = _translation if _translation
         end
-        translation_caches[locale]
+        translation_caches[language_code]
+      end
+
+      def translation_for_t(translator_code, build_if_missing = true)
+        unless translation_caches[translator_code]
+          # Fetch translations from database as those in the translation collection may be incomplete
+          _translation = translations.detect{|t| t.translator.code.to_s == translator_code.to_s}
+          _translation ||= translations.with_translator(translator_code).first unless translations.loaded?
+          _translation ||= translations.build(:translator => translator_code) if build_if_missing
+          translation_caches[translator_code] = _translation if _translation
+        end
+        translation_caches[translator_code]
       end
 
       def translation_caches
         @translation_caches ||= {}
       end
-
+=begin
       def translations_by_locale
         translations.each_with_object(HashWithIndifferentAccess.new) do |t, hash|
           hash[t.locale] = block_given? ? yield(t) : t
         end
       end
+=end
+      def translations_by_translator
+        translations.each_with_object(HashWithIndifferentAccess.new) do |t, hash|
+          hash[t.translator] = block_given? ? yield(t) : t
+        end
+      end
 
+      def translations_by_language
+        translations.each_with_object(HashWithIndifferentAccess.new) do |t, hash|
+          hash[t.language] = block_given? ? yield(t) : t
+        end
+      end
+=begin
       def translated_attribute_by_locale(name)
         translations_by_locale(&:"#{name}")
+      end
+=end
+      def translated_attribute_by_language(name)
+        translations_by_language(&:"#{name}")
       end
 
       def available_languages
@@ -156,11 +189,11 @@ module Globalize
       def globalize_fallbacks(locale)
         Globalize.fallbacks(locale)
       end
-
+=begin
       def rollback
         translation_caches[::Globalize.locale] = translation.previous_version
       end
-
+=end
       def save(*)
         Globalize.with_locale(translation.locale || I18n.default_locale) do
           without_fallbacks do

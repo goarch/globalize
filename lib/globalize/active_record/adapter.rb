@@ -13,19 +13,19 @@ module Globalize
         @stash = Attributes.new
       end
 
-      def fetch_stash(locale, name)
-        stash.read(locale, name)
+      def fetch_stash(language, name)
+        stash.read(language, name)
       end
 
       delegate :contains?, :to => :stash, :prefix => :stash
       delegate :write, :to => :stash
 
-      def fetch(locale, name)
-        record.globalize_fallbacks(locale).each do |fallback|
+      def fetch(language, name)
+        record.globalize_fallbacks(language).each do |fallback|
           value = stash.contains?(fallback, name) ? fetch_stash(fallback, name) : fetch_attribute(fallback, name)
 
           unless fallbacks_for?(value)
-            set_metadata(value, :locale => fallback, :requested_locale => locale)
+            set_metadata(value, :language => fallback, :requested_language => language)
             return value
           end
         end
@@ -34,6 +34,7 @@ module Globalize
       end
 
       def save_translations!
+=begin
         stash.reject {|locale, attrs| attrs.empty?}.each do |locale, attrs|
           translation = record.translations_by_locale[locale] ||
                         record.translations.build(locale: locale.to_s)
@@ -42,7 +43,7 @@ module Globalize
             translation[name] = value
           end
         end
-
+=end
         reset
       end
 
@@ -66,8 +67,8 @@ module Globalize
         column.text? && translation_class.serialized_attributes[name.to_s]
       end
 
-      def fetch_attribute(locale, name)
-        translation = record.translation_for(locale, false)
+      def fetch_attribute(language, name)
+        translation = record.translation_for(language, false)
         return translation && translation.send(name)
       end
 
